@@ -1,8 +1,15 @@
-import { IsEmail, IsString, MinLength } from "class-validator";
+import { IsAlpha, IsAlphanumeric, IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
 
-export interface SignUpDto {
+export class SignUpDto {
+    @IsNotEmpty()
+    @MinLength(3)
     name: string;
+
+    @IsEmail()
     email: string;
+
+    @IsNotEmpty()
+    @MinLength(8)
     password: string;
 }
 
