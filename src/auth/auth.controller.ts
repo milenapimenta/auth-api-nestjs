@@ -1,11 +1,13 @@
 
-import type { SignUpDto } from './dto/auth';
-import { SignInDto } from './dto/auth';
+import { SignInDto, SignUpDto } from './dto/auth';
 import { AuthService } from './auth.service';
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Request as ExpressRequest } from 'express';
 import { AuthGuard } from './auth.guard';
 
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
@@ -21,8 +23,9 @@ export class AuthController {
     }
 
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @Get('profile')
-    async profile(@Request() req) {
-        return req.user;
+    async profile(@Request() req: ExpressRequest) {
+        return (req as { user?: unknown }).user;
     }
 }
