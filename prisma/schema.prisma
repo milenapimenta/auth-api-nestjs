@@ -18,3 +18,13 @@ model User {
   email String @unique
   password String
 }
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  cnpj      String   @unique
+  phone     String
+  email     String
+  address   String
+  isActive  Boolean  @default(true)
+}

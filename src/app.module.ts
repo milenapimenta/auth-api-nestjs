@@ -5,6 +5,8 @@ import { AuthService } from './auth/auth.service';
 import { PrismaService } from './prisma/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CompaniesModule } from './companies/companies.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -12,7 +14,9 @@ import { UsersModule } from './users/users.module';
       isGlobal: true, 
     }),
     AuthModule,
-    UsersModule
+    UsersModule,
+    CompaniesModule,
+    PrismaModule
   ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService],
