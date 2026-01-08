@@ -19,19 +19,29 @@ export class UsersService {
     return this.prismaService.user.create({ data });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.prismaService.user.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.prismaService.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
+    return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    await this.prismaService.user.delete({
+      where: { id },
+    });
+    return { success: true };
   }
 }
