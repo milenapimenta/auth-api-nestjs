@@ -1,35 +1,54 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import type { Request } from "express";
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import type { Request } from 'express';
+import type Redis from 'ioredis';
+import { REDIS } from '../redis/redis.provider';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService) { }
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject(REDIS) private readonly redis: Redis,
+  ) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean>{
-        const request = context.switchToHttp().getRequest();
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
 
-        const token = this.extractTokenFromHeader(request);
+    const token = this.extractTokenFromHeader(request);
 
-        if (!token) {
-            throw new UnauthorizedException('Access token not found');
-        }
-
-        try {
-            const payload = await this.jwtService.verifyAsync(token, {
-                secret: 'banana'
-            });
-
-            request['user'] = payload;
-        } catch (error) {
-            throw new UnauthorizedException('Invalid access token');
-        }
-
-        return true;
+    if (!token) {
+      throw new UnauthorizedException('Access token not found');
     }
 
-    private extractTokenFromHeader(request: Request): string | undefined {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
+    const isBlacklisted = await this.redis.get(`auth:blacklist:${token}`);
+    if (isBlacklisted) {
+      throw new UnauthorizedException('Token revoked');
     }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: 'banana',
+      });
+
+      (request as any).user = payload;
+    } catch {
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    return true;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) return;
+
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' ? token : undefined;
+  }
 }

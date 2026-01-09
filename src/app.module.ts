@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
+import { TestModule } from './test/test.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     UsersModule,
     CompaniesModule,
-    PrismaModule
+    PrismaModule,
+    RedisModule,
+    TestModule
   ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService],

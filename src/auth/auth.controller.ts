@@ -21,11 +21,21 @@ export class AuthController {
     async signin(@Body() body: SignInDto) {
         return this.authService.signin(body);
     }
-
+    
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @Get('profile')
-    async profile(@Request() req: ExpressRequest) {
-        return (req as { user?: unknown }).user;
+    async profile(@Request() req: any) {
+        return this.authService.getProfile(req.user.id);
+    }
+
+    @Post('logout')
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
+    async logout(@Request() req: ExpressRequest) {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (!token) return;
+
+        return this.authService.logout(token);
     }
 }
